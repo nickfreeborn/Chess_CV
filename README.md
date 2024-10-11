@@ -24,3 +24,17 @@ We propose to develop a computer vision system for Project A: Board Game Trackin
 - (Week 11) Develop tracking algorithms and handle occlusions and implement move validation logic and conduct robustness testing.
 - (Week 12) Evaluation, benchmarking, and report preparation.
 - (week 13) Finalise project deliverables and presentation.
+
+## Roles
+### Nick
+- UI
+- Data acquisition and preprocessing
+- Occlusion handling
+
+### Mark
+- Move validation
+- Occlusion handling
+
+### Jenny
+- Piece identification and tracking
+- Occlusion handling
