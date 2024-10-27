@@ -19,7 +19,7 @@ class GUI(QtGui.QMainWindow):
     __view: pg.ViewBox = None
     __image_item: pg.ImageItem = None
 
-    def __init__(self, title: str = 'preview'):
+    def __init__(self, title: str = 'ChessCapture - by Rookie Technologies'):
         super(GUI, self).__init__(parent=None)
         self.setWindowTitle(title)
         self.setStyleSheet("background-color: #2C2C2C;")  # Dark grey background
@@ -28,6 +28,7 @@ class GUI(QtGui.QMainWindow):
         availableWidth = rect.width()
         self.display_width = int(availableWidth / 3)
         self.display_height = int(self.display_width * 3/4)
+        self.text_items = []
 
         # Create the main layout
         self.display_screen = QVBoxLayout()
@@ -74,8 +75,9 @@ class GUI(QtGui.QMainWindow):
         self.text_display.addWidget(self.text_display_box)
 
         # Create left column for the image display
-        self.__canvas = pg.GraphicsLayoutWidget(size=(self.display_width,self.display_width))
-        self.__view = pg.ViewBox(enableMouse=False)
+        self.__canvas = pg.GraphicsLayoutWidget()
+        self.__canvas.setStyleSheet("background-color: #2C2C2C;")
+        self.__view = pg.ViewBox(enableMouse=False,lockAspect=1.0)
         self.__view.suggestPadding = lambda *_: 0.0
         self.__view.invertY()
         self.__canvas.addItem(self.__view)
@@ -137,7 +139,9 @@ class GUI(QtGui.QMainWindow):
         }
         
         cell_size = self.display_width // 10  # Set cell size based on board dimensions
-        self.text_item = []
+        for item in self.text_items:
+          self.chess_scene.removeItem(item)
+        self.text_items.clear()
         for row in range(10):
             for col in range(10):
                 piece = board_matrix[row][col]
@@ -147,6 +151,7 @@ class GUI(QtGui.QMainWindow):
                     text_item.setFont(QFont("Arial", 30))
                     text_item.setPos(col * cell_size, row * cell_size)
                     self.chess_scene.addItem(text_item)
+                    self.text_items.append(text_item)  # Store the text item
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
@@ -196,8 +201,7 @@ class GUI(QtGui.QMainWindow):
         self.label.setStyleSheet('QLabel { color: black; margin: 10px; font-weight: bold; }')
 
     def __showConsoleText(self):
-        self.label.setText('\n'.join(self.__console_texts))
-        self.label.adjustSize()
+        self.text_display_box.append('\n'.join(self.__console_texts))
 
     def setImage(self, img):
         self.__image_item.setImage(img)

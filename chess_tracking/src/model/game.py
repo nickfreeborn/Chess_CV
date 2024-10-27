@@ -271,17 +271,20 @@ class Game(GUI):
             self.__agent.updateState(self.__agent.board.state())
             self.__print_board_layout(self.__agent.board.state())  # Print board after CPU move
 
-
-  def __print_board_layout(self, board_state):
-    print("Current Chessboard Layout:")
     output_matrix = [['.']*10]
     for row in board_state:
         row_str = ''.join([self.__piece_symbol(cell) for cell in row])
         output_matrix.append(['.']+ [ele for ele in row_str] +['.'])
-        print(row_str)
-    print()  # Newline for better readability
     output_matrix.append(['.']*10)
     self.set_chess_pieces(output_matrix)
+
+  def __print_board_layout(self, board_state):
+    print("Current Chessboard Layout:")
+    
+    for row in board_state:
+        row_str = ' '.join([self.__piece_symbol(cell) for cell in row])
+        print(row_str)
+    print()  # Newline for better readability
 
   def __piece_symbol(self, piece_id):
     symbols = {
@@ -295,8 +298,8 @@ class Game(GUI):
         6: "p",   # Black Pawn
         7: "r",   # Black Rook
         8: "b",   # Black Bishop
-        9: "n",   # Black Knight
+        9: "q",   # Black Knight
         10: "k",  # Black King
-        11: "q"   # Black Queen
+        11: "n"   # Black Queen
     }
     return symbols.get(piece_id, "?")
