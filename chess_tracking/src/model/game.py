@@ -249,7 +249,7 @@ class Game(GUI):
     fps2 = 1.0 / dt
     self.__lastupdate = now
     self.__fps = self.__fps * 0.9 + fps2 * 0.1
-    self.print('Mean Frame Rate:  {:.2f} FPS'.format(self.__fps), index=0)
+    #self.print('Mean Frame Rate:  {:.2f} FPS'.format(self.__fps), index=0)
 
   def __runScan(self, only_prediction: bool = False):
     print('scanning...')
@@ -274,10 +274,14 @@ class Game(GUI):
 
   def __print_board_layout(self, board_state):
     print("Current Chessboard Layout:")
+    output_matrix = [['.']*10]
     for row in board_state:
-        row_str = ' '.join([self.__piece_symbol(cell) for cell in row])
+        row_str = ''.join([self.__piece_symbol(cell) for cell in row])
+        output_matrix.append(['.']+ [ele for ele in row_str] +['.'])
         print(row_str)
     print()  # Newline for better readability
+    output_matrix.append(['.']*10)
+    self.set_chess_pieces(output_matrix)
 
   def __piece_symbol(self, piece_id):
     symbols = {
