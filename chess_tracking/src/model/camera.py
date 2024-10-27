@@ -9,7 +9,7 @@ class Camera:
   previousMillis: int = 0
   stop: bool
 
-  def __init__(self, cam_address, resize_percent=0.35, fps=30):
+  def __init__(self, cam_address, resize_percent=1.0, fps=30):
     """
     Initialize a `Camera` object
 
@@ -20,7 +20,7 @@ class Camera:
     self.resize_percent = resize_percent
     self.fps = fps
     
-    self.cap = cv2.VideoCapture(cam_address)
+    self.cap = cv2.VideoCapture(9)
     if self.cap.isOpened():
       width = self.cap.get(cv2.cv2.CAP_PROP_FRAME_WIDTH)
       height = self.cap.get(cv2.cv2.CAP_PROP_FRAME_HEIGHT)
@@ -61,21 +61,24 @@ class Camera:
     Return a single next frame of the capture camera
     """
     try:
-      retval, frame = self.cap.read()
+        retval, frame = self.cap.read()
+        if not retval or frame is None:
+            raise Exception('Could not get the next video frame.')
 
-      if not retval:
-        raise Exception('Could not get the next video frame.')
+        # define new resolution
+        height, width = self.resolution
+        new_w = int(width * self.resize_percent)
+        new_h = int(height * self.resize_percent)
 
-      # define new resolution
-      height, width = self.resolution
-      new_w = int(width - (self.resize_percent * width))
-      new_h = int(height - (self.resize_percent * height))
+        # resize if needed
+        if self.resize_percent < 1.0:
+            frame = cv2.resize(frame, (new_w, new_h))
 
-      frame = cv2.resize(frame, (new_w, new_h))
-      return frame
-    except:
-      self.stopRunning()
-      raise Exception('Could not get the next video frame.')
+        return frame
+    except Exception as e:
+        self.stopRunning()
+        raise Exception('Could not get the next video frame.') from e
+
 
   def stopRunning(self):
     """

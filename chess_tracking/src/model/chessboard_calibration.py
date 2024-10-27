@@ -4,6 +4,7 @@ import imutils
 import json
 import os
 import sys
+import matplotlib as plt
 
 from typing import Dict, Tuple
 from utils import (
@@ -34,7 +35,7 @@ class ChessboardCalibration(Debugable):
   smooth_ksize: tuple
 
   __out_size: tuple = None
-  __padding_val: tuple = (15, 20)
+  __padding_val: tuple = (20, 30)
   __matrix: list
 
   def __init__(self, debug=False):
@@ -79,6 +80,9 @@ class ChessboardCalibration(Debugable):
     # make bug on the squares recognitions
     pa_image = self.playableArea(self.chessboard_img)
 
+    # cv2.imshow('image', pa_image)
+    # plt.imshow(pa_image)
+
     # get chess board squares corners
     corners = self.squaresCorners(pa_image)
 
@@ -117,6 +121,10 @@ class ChessboardCalibration(Debugable):
       kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8)
       thresh = cv2.dilate(thresh, kernel, iterations=1)
 
+    thresh = cv2.bitwise_not(thresh)
+
+    self.save('0thresh.jpg', thresh)
+
     self.board.contours = self.biggestContours(thresh)
     
     # only works when debug flag is True
@@ -129,6 +137,7 @@ class ChessboardCalibration(Debugable):
     self.save('3_playable_area.jpg', cropped)
 
     # crop image with padding to remove chess board borders
+    # print("about to Padding rn")
     if self.add_padding:
       cropped = self.addPadding(
         cropped,
@@ -136,7 +145,7 @@ class ChessboardCalibration(Debugable):
         self.__padding_val[1],
         self.__out_size
       )
-      self.save('3.1_padding.jpg', cropped)
+    self.save('3.1_padding.jpg', cropped)
 
     return cropped
   
@@ -188,23 +197,30 @@ class ChessboardCalibration(Debugable):
     return cv2.warpPerspective(img, M, output_image_size)
 
   def squaresCorners(self, pa_image):
+    # cv2.imshow('image', pa_image)
+    # cv2.waitKey(0)
+
     try:
-      
       gray = cv2.cvtColor(pa_image, cv2.COLOR_BGR2GRAY)
 
       # Blur the image a little. This smooths out the noise a bit and
       # makes extracting the grid lines easier.
       gray_blur = cv2.GaussianBlur(gray, (5, 5), 0)
+      self.save('0gray.jpg', gray_blur)
 
       # Canny algorithm
       edges = canny_edge(gray_blur)
+      self.save('0edges.jpg', edges)
 
       # Hough Transform
       lines = hough_line(edges)
 
+      # print(lines)
+
       # Separate the lines into vertical and horizontal lines
       h_lines, v_lines = h_v_lines(lines)
 
+      # print(h_lines, v_lines)
       # Find and cluster the intersecting
       intersection_points = line_intersections(h_lines, v_lines)
       points = cluster_points(intersection_points)
