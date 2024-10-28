@@ -15,19 +15,19 @@ directions = {
 A1, H1, A8, H8 = 91, 98, 21, 28
 Move = namedtuple("Move", "i j prom")
 
-class Colour(Enum):
-    NONE = -1
-    BLACK = 0
-    WHITE = 1
+# class Colour(Enum):
+#     NONE = -1
+#     BLACK = 0
+#     WHITE = 1
 
-class PieceType(Enum):
-    NONE = ""
-    PAWN = "Pawn"
-    KNIGHT = "Knight"
-    BISHOP = "Bishop"
-    ROOK = "Rook"
-    QUEEN = "Queen"
-    KING = "King"
+# class PieceType(Enum):
+#     NONE = ""
+#     PAWN = "Pawn"
+#     KNIGHT = "Knight"
+#     BISHOP = "Bishop"
+#     ROOK = "Rook"
+#     QUEEN = "Queen"
+#     KING = "King"
 
 class Position(namedtuple("Position", "board score wc bc ep kp")):
     """A state of a chess game
@@ -46,7 +46,13 @@ class Position(namedtuple("Position", "board score wc bc ep kp")):
         if isinstance(other, self.__class__):
             # Positions are equivalent if and only if the pieces are set up the same
             # Castling rights, en-passant and king-passant squares are ignored for now
-            return self.board == other.board
+            matchwithoutrotate = (self.board == other.board)
+            self.rotate()
+            matchwithrotate = (self.board == other.board)
+            self.rotate()
+            if (matchwithoutrotate or matchwithrotate):
+                return True
+            return False
         else:
             return False
 
@@ -136,7 +142,7 @@ class Position(namedtuple("Position", "board score wc bc ep kp")):
             119 - self.kp if self.kp and not nullmove else 0,
         )
 
-def getBoard(colours, pieces):
+def getBoard(board_repr):
 
     board = []
     for i in range(120):
@@ -155,85 +161,136 @@ def getBoard(colours, pieces):
             board.append(" ")
             continue
 
-        colour = colours[row - 2][col - 1]
+        piece = board_repr[row - 2][col - 1]
 
-        if colour == Colour.NONE.value:
-            board.append(".")
-            continue
+        c = piece_symbol(piece)
+    
+        # if colour == Colour.NONE.value:
+        #     board.append(".")
+        #     continue
         
-        # set c to the first character of the corresponding entry in 'pieces', for example K for King, B for Bishop.
-        if pieces[row-2][col-1] == PieceType.KNIGHT.value:
-            # set c to "N" it it's a Knight. This way we don't confuse it with K for King
-            c = "N"
-        else:
-            c = pieces[row-2][col-1][0]
+        # # set c to the first character of the corresponding entry in 'pieces', for example K for King, B for Bishop.
+        # if pieces[row-2][col-1] == PieceType.KNIGHT.value:
+        #     # set c to "N" it it's a Knight. This way we don't confuse it with K for King
+        #     c = "N"
+        # else:
+        #     c = pieces[row-2][col-1][0]
 
-        if colour == Colour.BLACK.value:
-            c = c.lower()
+        # if colour == Colour.BLACK.value:
+        #     c = c.lower()
+        
         board.append(c)
     
     return ''.join(board)
 
-pieces = [
-    ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
-    ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
-    ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
-]
+def piece_symbol(piece_id):
+    symbols = {
+        -1: ".",  # Empty square
+        0: "P",   # White Pawn
+        1: "R",   # White Rook
+        2: "B",   # White Bishop
+        3: "N",   # White Knight
+        4: "K",   # White King
+        5: "Q",   # White Queen
+        6: "p",   # Black Pawn
+        7: "r",   # Black Rook
+        8: "b",   # Black Bishop
+        9: "q",   # Black Knight
+        10: "k",  # Black King
+        11: "n"   # Black Queen
+    }
+    return symbols.get(piece_id, "?")
 
-colours = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
+# pieces = [
+#     ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
+#     ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
+#     [" ", " ", " ", " ", " ", " ", " ", " "],
+#     [" ", " ", " ", " ", " ", " ", " ", " "],
+#     [" ", " ", " ", " ", " ", " ", " ", " "],
+#     [" ", " ", " ", " ", " ", " ", " ", " "],
+#     ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
+#     ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
+# ]
+
+# colours = [
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 1, 1, 1, 1, 1, 1, 1],
+# ]
+
+# current_pieces = [
+#     ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
+#     ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
+#     ["", "", "", "", "", "", "", ""],
+#     ["", "", "", "", "", "", "", ""],
+#     ["", "Pawn", "", "", "", "", "", ""],
+#     ["", "", "", "", "", "", "", ""],
+#     ["Pawn", "", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
+#     ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
+# ]
+
+# current_colours = [
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0, 0],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, 1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [1, -1, 1, 1, 1, 1, 1, 1],
+#     [1, 1, 1, 1, 1, 1, 1, 1],
+# ]
+# board = getBoard(colours, pieces)
+# myPosition = Position(board=board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
+# # print(myPosition)
+
+# for m in myPosition.gen_moves():
+#     new_Position = myPosition.move(m)
+#     # print(new_Position)
+#     # print("\n")
+
+old_board_repr = [
+    [7, 11, 8, 9, 10, 8, 11, 7],
+    [6, 6, 6, 6, 6, 6, 6, 6],
     [-1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1],
     [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 3, 2, 5, 4, 2, 3, 1],
 ]
 
-current_pieces = [
-    ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
-    ["Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "Pawn", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["Pawn", "", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn", "Pawn"],
-    ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"]
+new_board_repr = [
+    [7, 11, 8, 9, 10, 8, 11, 7],
+    [6, 6, 6, 6, 6, 6, 6, 6],
+    [-1, -1, -1, -1, -1, -1, -1, -1],
+    [-1, -1, -1, -1, -1, -1, -1, -1],
+    [-1, -1, -1, -1, 1, -1, -1, -1],
+    [-1, -1, -1, -1, -1, -1, -1, -1],
+    [1, 1, 1, 1, -1, 1, 1, 1],
+    [1, 3, 2, 5, 4, 2, 3, 1],
 ]
 
-current_colours = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, 1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [1, -1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1],
-]
-board = getBoard(colours, pieces)
-myPosition = Position(board=board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
-# print(myPosition)
-
-for m in myPosition.gen_moves():
-    new_Position = myPosition.move(m)
-    # print(new_Position)
-    # print("\n")
-
-old_board = getBoard(colours, pieces)
-current_board = getBoard(current_colours, current_pieces)
+old_board = getBoard(old_board_repr)
+current_board = getBoard(new_board_repr)
 oldPosition = Position(board=old_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
 currentPosition = Position(board=current_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
-print(oldPosition)
-print(currentPosition)
+# print(oldPosition)
+# print(currentPosition)
 
 moveIsLegal = False
+# A legal move can be made by EITHER player and this function will still call it legal
+# regardless of whose turn it actually is
+# This means that we don't have to store and pass around whose turn it is to play
+for m in oldPosition.gen_moves():
+    legalPosition = oldPosition.move(m)
+    if currentPosition == legalPosition:
+        moveIsLegal = True
+oldPosition.rotate() # switch whose turn it is
 for m in oldPosition.gen_moves():
     legalPosition = oldPosition.move(m)
     if currentPosition == legalPosition:
