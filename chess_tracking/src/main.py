@@ -10,10 +10,20 @@ parser.add_argument("-m", "--mapping",
                     default=False,
                     help="Starts the mapping of the board")
 
-parser.add_argument("-s", "--start",
+parser.add_argument("-st", "--start",
                     action=BooleanOptionalAction,
                     default=False,
                     help="Chess game starts")
+
+parser.add_argument("-t", "--train",
+                    action=BooleanOptionalAction,
+                    default=False,
+                    help="Photograph a square of the board for training")
+
+parser.add_argument("-sn", "--snap",
+                    action=BooleanOptionalAction,
+                    default=False,
+                    help="Snaps a photo of the board")
 
 args = vars(parser.parse_args())
 
@@ -29,4 +39,18 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     game = Game()
     game.start()
+    sys.exit(app.exec_())
+
+  # take pictures for training
+  if args['train']:
+    app = QtGui.QApplication(sys.argv)
+    game = Game()
+    game.train()
+    sys.exit(app.exec_())
+
+  # take pictures for training
+  if args['snap']:
+    app = QtGui.QApplication(sys.argv)
+    game = Game()
+    game.snap()
     sys.exit(app.exec_())

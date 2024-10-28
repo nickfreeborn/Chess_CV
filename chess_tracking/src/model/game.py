@@ -7,6 +7,8 @@ from model.gui import GUI
 from dotenv import dotenv_values
 from pyqtgraph.Qt import QtCore, QtGui
 from utils import draw_bounding_box_on_image
+import os
+import re
 
 import cv2
 import numpy as np
@@ -56,6 +58,11 @@ class Game(GUI):
   __detections: list = None
   __scan_timer: QtCore.QTimer = None
 
+  x1: None
+  x2: None
+  x3: None
+  x4: None
+
   def __init__(self, **kwargs):
     super(Game, self).__init__(**kwargs)
     self.__config = dotenv_values()
@@ -68,6 +75,137 @@ class Game(GUI):
     self.__lastupdate = time.time()
     
     self.__fenstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+  def snap(self):
+    self.__camera = Camera(self.__cam_address)
+
+    self.__running_calibration = ChessboardCalibration()
+    found, self.__board = self.__running_calibration.loadMapping()
+    if not found:
+        raise Exception('No mapping found. Run calibration mapping')
+
+    # Capture initial frame and update board state
+    frame = self.__camera.capture()
+    self.__processed_image = self.__running_calibration.applyMapping(frame)
+
+    path = "assets/snaps/"
+    os.makedirs(path, exist_ok=True)
+    imagename_base = "board_snap"
+
+    pattern = re.compile(f"{imagename_base}_(\d{{3}}).jpg")  # regex to match Bishop_a1_XXXX.jpg
+
+    # Find the highest existing number in the filenames
+    self.counter = 0
+    existing_files = os.listdir(path)
+    for filename in existing_files:
+        match = pattern.match(filename)
+        if match:
+            num = int(match.group(1))
+            if num >= self.counter:
+                self.counter = num + 1  # Set counter to one higher than the highest number
+
+
+    # Format the counter as a four-digit number
+    file_number = str(self.counter).zfill(3)
+    filename = f"{imagename_base}_{file_number}.jpg"
+    
+    cv2.imwrite(path + filename, self.__processed_image)
+
+    exit(0)
+    # self.show()
+
+  def train(self):
+
+    # colours = []
+    # pieces = []
+    # coordinates = []
+
+    # assert(len(colours) == len(pieces))
+    # assert(len(pieces) == len(coordinates))
+
+
+
+
+
+
+
+
+
+
+
+
+    colour = input('What piece colour? (w, b)')
+    piece = input('What piece type? (p, n, b, r, q, k)')
+    coordinate = input('Type the square coordinates (e.g a1, c5, h8, b2)')
+    training_imgs_path = "Chess_CV/chess_tracking/assets/training_imgs/" + piece
+    file = coordinate[0]
+    rank = coordinate[1]
+
+    self.__camera = Camera(self.__cam_address)
+
+    self.__running_calibration = ChessboardCalibration()
+    found, self.__board = self.__running_calibration.loadMapping()
+    if not found:
+        raise Exception('No mapping found. Run calibration mapping')
+
+    # Capture initial frame and update board state
+    frame = self.__camera.capture()
+    self.__processed_image = self.__running_calibration.applyMapping(frame)
+
+    ROW = ord(file) - ord('a')
+    COL = int(rank) - 1
+
+    self.x1 = self.__board.squares[ROW][COL].x1
+    self.x2 = self.__board.squares[ROW][COL].x2
+    self.y1 = self.__board.squares[ROW][COL].y1
+    self.y2 = self.__board.squares[ROW][COL].y2
+
+    cropped_image = self.__processed_image[self.y1:self.y2, self.x1:self.x2]
+
+    self.file_path = "assets/training_imgs/" + f"{colour}/" + piece + f"/{coordinate}/" # specify your directory path
+
+    # Ensure the directory exists
+    os.makedirs(self.file_path, exist_ok=True)
+
+
+    # Initialize counter by checking existing files
+    existing_files = os.listdir(self.file_path)
+    self.filename_base = f"{piece}_" + f"{coordinate}"
+    pattern = re.compile(f"{self.filename_base}_(\d{{5}}).jpg")  # regex to match Bishop_a1_XXXX.jpg
+
+    # Find the highest existing number in the filenames
+    self.counter = 0
+    for filename in existing_files:
+        match = pattern.match(filename)
+        if match:
+            num = int(match.group(1))
+            if num >= self.counter:
+                self.counter = num + 1  # Set counter to one higher than the highest number
+
+
+    # Format the counter as a four-digit number
+    file_number = str(self.counter).zfill(5)
+    filename = f"{self.filename_base}_{file_number}.jpg"
+    
+    # Construct the full file path
+    final_path = os.path.join(self.file_path, filename)
+    
+    # Save the image
+    cv2.imwrite(final_path, cropped_image)
+    print(final_path)
+    
+    # Increment the counter for the next image
+    self.counter += 1
+
+
+    result = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
+    self.setImage(result)
+    self.__updateFrameRate()
+
+    QtCore.QTimer.singleShot(50, self.__trainCaptureFrame)
+
+    self.show()
+
 
   def mapping(self):
     """
@@ -110,6 +248,32 @@ class Game(GUI):
 
     self.show()
 
+  def __trainCaptureFrame(self):
+
+    frame = self.__camera.capture()
+    self.__processed_image = self.__running_calibration.applyMapping(frame)
+
+    cropped_image = self.__processed_image[self.y1:self.y2, self.x1:self.x2]
+
+    # Format the counter as a four-digit number
+    file_number = str(self.counter).zfill(5)
+    filename = f"{self.filename_base}_{file_number}.jpg"
+    
+    # Construct the full file path
+    final_path = os.path.join(self.file_path, filename)
+    
+    # Save the image
+    cv2.imwrite(final_path, cropped_image)
+    print(final_path)
+    
+    # Increment the counter for the next image
+    self.counter += 1
+
+    result = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
+    self.setImage(result)
+    self.__updateFrameRate()
+
+    QtCore.QTimer.singleShot(50, self.__trainCaptureFrame)
 
   def __captureFrame(self):
     frame = self.__camera.capture()
