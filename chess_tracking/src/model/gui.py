@@ -131,6 +131,12 @@ class GUI(QtGui.QMainWindow):
         # Define tool tip settings
         QtGui.QToolTip.setFont(QtGui.QFont('Helvetica', 18))
 
+    def output_move(self, legality):
+        if (legality):
+          self.text_display_box.append("Legal Move!")
+        else:
+          self.text_display_box.append("Illegal Move!")
+
     def output_fen(self, fen_string):
         self.game_state_box.append(fen_string)
 

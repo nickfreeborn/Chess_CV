@@ -1,6 +1,7 @@
 from typing import Dict, Tuple
 from model.chessboard_calibration import ChessboardCalibration
 from model.board import Board
+import model.board_check 
 from model.agent import Agent
 from model.camera import Camera
 from model.gui import GUI
@@ -62,6 +63,18 @@ class Game(GUI):
     self.__cam_address = self.__config.get('CAM_ADDRESS')
     self.__agent = Agent()
     self.__debug = bool(int(self.__config.get('DEBUG')))
+    self.old_state = [
+       ['.','.','.','.','.','.','.','.','.','.'],
+       ['.','R','N','B','Q','K','B','N','R','.'],
+       ['.','P','P','P','P','P','P','P','P','.'],
+       ['.','.','.','.','.','.','.','.','.','.'],
+       ['.','.','.','.','.','.','.','.','.','.'],
+       ['.','.','.','.','.','.','.','.','.','.'],
+       ['.','.','.','.','.','.','.','.','.','.'],
+       ['.','p','p','p','p','p','p','p','p','.'],
+       ['.','r','n','b','q','k','b','n','r','.'],
+       ['.','.','.','.','.','.','.','.','.','.']
+    ]
 
     # frame rate metrics
     self.__fps = 0.
@@ -258,6 +271,12 @@ class Game(GUI):
     squares, self.__detections = self.__board.scan(self.__processed_image)
     board_state = self.__board.toMatrix(squares)
 
+    new_state = board_state
+    legality = False
+    if (model.board_check.isOneLegalMoveAway(self.old_state, new_state)):
+       legality = True
+
+
     fen_rows = []
     for row in board_state:
         fen_row = ''
@@ -304,6 +323,8 @@ class Game(GUI):
     output_matrix.append(['.']*10)
     self.set_chess_pieces(output_matrix)
     self.output_fen(self.__fenstring)
+    self.output_move(legality)
+    self.old_state = new_state
 
   def __print_board_layout(self, board_state):
     print("Current Chessboard Layout:")
