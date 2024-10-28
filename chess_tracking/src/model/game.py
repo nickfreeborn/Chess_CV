@@ -66,6 +66,8 @@ class Game(GUI):
     # frame rate metrics
     self.__fps = 0.
     self.__lastupdate = time.time()
+    
+    self.__fenstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
   def mapping(self):
     """
@@ -255,6 +257,28 @@ class Game(GUI):
     print('scanning...')
     squares, self.__detections = self.__board.scan(self.__processed_image)
     board_state = self.__board.toMatrix(squares)
+
+    fen_rows = []
+    for row in board:
+        fen_row = ''
+        empty_count = 0
+        for piece in row:
+            if piece == -1:  # Empty square
+                empty_count += 1
+            else:
+                if empty_count > 0:
+                    fen_row += str(empty_count)  # Add the count of empty squares
+                    empty_count = 0
+                fen_row += self.__piece_symbol(piece)
+        if empty_count > 0:
+            fen_row += str(empty_count)  # Add any remaining empty squares
+        
+        fen_rows.append(fen_row)
+    
+    self.__fenstring = '/'.join(fen_rows)
+    
+    # Add game state info (placeholder values)
+    fen += ' w KQkq - 0 1'  # Assuming
 
     if not only_prediction:
         human_move = self.__agent.state2Move(board_state)
