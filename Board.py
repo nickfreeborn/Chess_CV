@@ -253,47 +253,71 @@ def piece_symbol(piece_id):
 #     # print(new_Position)
 #     # print("\n")
 
-old_board_repr = [
-    [7, 11, 8, 9, 10, 8, 11, 7],
-    [6, 6, 6, 6, 6, 6, 6, 6],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 3, 2, 5, 4, 2, 3, 1],
-]
+# old_board_repr = [
+#     [7, 11, 8, 9, 10, 8, 11, 7],
+#     [6, 6, 6, 6, 6, 6, 6, 6],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 3, 2, 5, 4, 2, 3, 1],
+# ]
 
-new_board_repr = [
-    [7, 11, 8, 9, 10, 8, 11, 7],
-    [6, 6, 6, 6, 6, 6, 6, 6],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [-1, -1, -1, -1, 1, -1, -1, -1],
-    [-1, -1, -1, -1, -1, -1, -1, -1],
-    [1, 1, 1, 1, -1, 1, 1, 1],
-    [1, 3, 2, 5, 4, 2, 3, 1],
-]
+# new_board_repr = [
+#     [7, 11, 8, 9, 10, 8, 11, 7],
+#     [6, 6, 6, 6, 6, 6, 6, 6],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, 1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [1, 1, 1, 1, -1, 1, 1, 1],
+#     [1, 3, 2, 5, 4, 2, 3, 1],
+# ]
 
-old_board = getBoard(old_board_repr)
-current_board = getBoard(new_board_repr)
-oldPosition = Position(board=old_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
-currentPosition = Position(board=current_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
+# old_board = getBoard(old_board_repr)
+# current_board = getBoard(new_board_repr)
+# oldPosition = Position(board=old_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
+# currentPosition = Position(board=current_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
 # print(oldPosition)
 # print(currentPosition)
 
-moveIsLegal = False
-# A legal move can be made by EITHER player and this function will still call it legal
-# regardless of whose turn it actually is
-# This means that we don't have to store and pass around whose turn it is to play
-for m in oldPosition.gen_moves():
-    legalPosition = oldPosition.move(m)
-    if currentPosition == legalPosition:
-        moveIsLegal = True
-oldPosition.rotate() # switch whose turn it is
-for m in oldPosition.gen_moves():
-    legalPosition = oldPosition.move(m)
-    if currentPosition == legalPosition:
-        moveIsLegal = True
 
-print(moveIsLegal)
+#inputs:
+#   old: the previous state of the board. i.e. the board right before the move was played 
+# a list of lists, with numbers to represent pieces. The starting position should look like this:
+# old = [
+#     [7, 11, 8, 9, 10, 8, 11, 7],
+#     [6, 6, 6, 6, 6, 6, 6, 6],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [-1, -1, -1, -1, -1, -1, -1, -1],
+#     [1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 3, 2, 5, 4, 2, 3, 1],
+# ]
+
+#  new: the current state of the board. i.e. a move has just been played
+
+def isOneLegalMoveAway(old, new):
+    old_board = getBoard(old)
+    current_board = getBoard(new)
+    
+    oldPosition = Position(board=old_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
+    currentPosition = Position(board=current_board, score=0, wc=[True, True], bc=[True, True], ep=0, kp=0)
+        
+    moveIsLegal = False
+    # A legal move can be made by EITHER player and this function will still call it legal
+    # regardless of whose turn it actually is
+    # This means that we don't have to store and pass around whose turn it is to play
+    for m in oldPosition.gen_moves():
+        legalPosition = oldPosition.move(m)
+        if currentPosition == legalPosition:
+            moveIsLegal = True
+    oldPosition.rotate() # switch whose turn it is
+    for m in oldPosition.gen_moves():
+        legalPosition = oldPosition.move(m)
+        if currentPosition == legalPosition:
+            moveIsLegal = True
+    
+    return moveIsLegal
