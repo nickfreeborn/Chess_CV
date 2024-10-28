@@ -131,6 +131,9 @@ class GUI(QtGui.QMainWindow):
         # Define tool tip settings
         QtGui.QToolTip.setFont(QtGui.QFont('Helvetica', 18))
 
+    def output_fen(self, fen_string):
+        self.game_state_box.append(fen_string)
+
     def set_chess_pieces(self, board_matrix):
         """Sets chess pieces as text items on the chessboard background."""
         piece_map = {

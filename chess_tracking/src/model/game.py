@@ -303,6 +303,7 @@ class Game(GUI):
         output_matrix.append(['.']+ [ele for ele in row_str] +['.'])
     output_matrix.append(['.']*10)
     self.set_chess_pieces(output_matrix)
+    self.output_fen(self.__fenstring)
 
   def __print_board_layout(self, board_state):
     print("Current Chessboard Layout:")
