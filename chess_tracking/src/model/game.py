@@ -259,7 +259,7 @@ class Game(GUI):
     board_state = self.__board.toMatrix(squares)
 
     fen_rows = []
-    for row in board:
+    for row in board_state:
         fen_row = ''
         empty_count = 0
         for piece in row:
