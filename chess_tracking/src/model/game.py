@@ -275,10 +275,12 @@ class Game(GUI):
         
         fen_rows.append(fen_row)
     
-    self.__fenstring = '/'.join(fen_rows)
+    fen = '/'.join(fen_rows)
     
     # Add game state info (placeholder values)
     fen += ' w KQkq - 0 1'  # Assuming
+    
+    self.__fenstring = fen
 
     if not only_prediction:
         human_move = self.__agent.state2Move(board_state)
