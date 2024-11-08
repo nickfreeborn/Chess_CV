@@ -130,6 +130,10 @@ class ChessboardCalibration(Debugable):
     # only works when debug flag is True
     self.drawBiggestContours(self.board.contours, chessboard_image)
 
+    self.drawBiggestContours(self.board.contours, thresh)
+    self.save('0thresh.jpg', thresh)
+
+
     # crop image using biggest contours
     cropped = self.cropImage(chessboard_image,  self.board.contours)
 
