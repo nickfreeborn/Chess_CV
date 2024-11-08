@@ -20,7 +20,7 @@ class Camera:
     self.resize_percent = resize_percent
     self.fps = fps
     
-    self.cap = cv2.VideoCapture(9)
+    self.cap = cv2.VideoCapture(1)
     if self.cap.isOpened():
       width = self.cap.get(cv2.cv2.CAP_PROP_FRAME_WIDTH)
       height = self.cap.get(cv2.cv2.CAP_PROP_FRAME_HEIGHT)

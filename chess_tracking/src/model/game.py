@@ -239,7 +239,7 @@ class Game(GUI):
 
     # Capture initial frame and update board state
     self.__captureFrame()
-    self.__runScan(only_prediction=True)
+    # self.__runScan(only_prediction=True)
     
     # Print initial chessboard layout
     self.__print_board_layout(self.__agent.board.state())

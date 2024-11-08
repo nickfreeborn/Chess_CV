@@ -11,7 +11,7 @@ from dotenv import dotenv_values
 class Board:
   contours: list = None
   squares: list[Square] = None
-  network: Darknet = Darknet.instance()
+  # network: Darknet = Darknet.instance()
   __squaresAverage: int
   __config: Dict = None
 
